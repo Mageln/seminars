@@ -1,9 +1,12 @@
 {
   "seminars": [
     {
+      "id": 1,
       "title": "Новинки Kosmoteros",
       "description": "Обзор новых средств и методик от Kosmoteros.",
-      "id": 1
+      "photo": "https://picsum.photos/id/1/750/730",
+      "date": "01.02.2025",
+      "time": "10:00"
     },
     {
       "id": 2,

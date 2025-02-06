@@ -6,13 +6,16 @@ import css from "./EditSeminarModal.module.scss";
 const EditSeminarModal = ({ seminar, onClose, onSave }) => {
   const [title, setTitle] = useState(seminar.title);
   const [description, setDescription] = useState(seminar.description);
+  const date = seminar.date
+  const time = seminar.time;
+  const [photo, setPhoto] = useState(seminar.photo)
   const [error, setError] = useState(null);
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await onSave(seminar.id, { title, description, });
+      await onSave(seminar.id, { title, description,  photo,date,time });
       setTimeout(() => {
         onClose();
       }, 3000);
@@ -21,6 +24,14 @@ const EditSeminarModal = ({ seminar, onClose, onSave }) => {
       setError("Не удалось сохранить изменения. Пожалуйста, попробуйте снова.");
     }
   };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if(file){
+      const fileURL = URL.createObjectURL(file);
+      setPhoto(fileURL);
+    }
+  }
 
   return (
     <div className={`${css.modalOverlay} ${css.open}`}>
@@ -40,8 +51,14 @@ const EditSeminarModal = ({ seminar, onClose, onSave }) => {
             placeholder="Description"
             required
           />
-
-
+            <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            placeholder="Photo"
+        
+          />
+          {error && <div>{error}</div>}
           <button type="submit">Сохранить</button>
           <button type="button" onClick={onClose}>
             Отмена
@@ -56,8 +73,10 @@ EditSeminarModal.propTypes = {
   seminar: PropTypes.shape({
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
+    time: PropTypes.string.isRequired,
     date: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    photo: PropTypes.any.isRequired,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,

@@ -6,30 +6,18 @@ import SeminarItem from "../SeminarItem/SeminarItem";
 import useSeminars from "../../hook/useSeminars";
 
 const SeminarList = () => {
-  const { seminars, loading, error, handleDelete, handleUpdate } = useSeminars();
+  const { seminars, loading, error, confirmDelete, handleEdit, handleSave,isDeleteModalOpen,setDeleteModalOpen } = useSeminars();
   const [selectedSeminar, setSelectedSeminar] = useState(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  // const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [seminarToDelete, setSeminarToDelete] = useState(null);
+  const [filterTitle, setFilterTitle] = useState("");
 
+  const filteredSeminars = seminars.filter(seminar =>
+    seminar.title.toLowerCase().includes(filterTitle.toLowerCase())
+  );
   // Открытие модального окна с подтверждением удаления
-  const confirmDelete = () => {
-    handleDelete(seminarToDelete);
-    setDeleteModalOpen(false);
-  };
 
-  // Открытие модального окна для редактирования
-  const handleEdit = (id) => {
-    const seminarToEdit = seminars.find((seminar) => seminar.id === id);
-    setSelectedSeminar(seminarToEdit);
-    setEditModalOpen(true);
-  };
-
-  // Сохранение редактирования
-  const handleSave = (id, updatedData) => {
-    handleUpdate(id, updatedData);
-    setEditModalOpen(false);
-  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -37,8 +25,14 @@ const SeminarList = () => {
   return (
     <div className={css.container}>
       <h1 className={css.title}>Seminars</h1>
+      <input className={css.search} type="text"
+      placeholder="Поиск"
+      value={filterTitle}
+      onChange={(e) => setFilterTitle(e.target.value)} />
       <ul className={css.seminarList}>
-        {seminars.map((seminar) => (
+        {filteredSeminars.length > 0 ? (
+        
+        filteredSeminars.map((seminar) => (
           <SeminarItem
             key={seminar.id}
             seminar={seminar}
@@ -46,21 +40,26 @@ const SeminarList = () => {
               setSeminarToDelete(id);
               setDeleteModalOpen(true);
             }}
-            onEdit={handleEdit}
+            onEdit={() => handleEdit(seminar.id, setSelectedSeminar, setEditModalOpen)}
           />
-        ))}
+        ))
+      ):(
+
+        <li>Нет подходящих</li>
+      )
+      }
       </ul>
       {isEditModalOpen && (
         <EditSeminarModal
           seminar={selectedSeminar}
           onClose={() => setEditModalOpen(false)}
-          onSave={handleSave}
+          onSave={(id, updatedData) => handleSave(id, updatedData, setEditModalOpen)}
         />
       )}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
-        onConfirm={confirmDelete}
+        onConfirm={() => confirmDelete(seminarToDelete)}
       />
     </div>
   );
